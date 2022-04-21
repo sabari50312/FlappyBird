@@ -134,18 +134,29 @@ bird = player(100, HEIGHT / 2)
 run = True
 
 #MAIN
-pygame.time.delay(1500)
-while (run):
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-    collision_handler()
-    bird.grav()
-    block.move()
-    jump_handler()
-    boundaries_handler()
-    print(bird.score)
-    draw_window()
+while (True):
+    text1 = my_font.render("Press space to start", True, (255, 255, 255))
+    text2 = my_font.render("Any to quit", True, (255, 255, 255))
+    WIN.blit(text1, dest=(60, HEIGHT // 2 - 30))
+    WIN.blit(text2, dest=(60, HEIGHT // 2))
 
+    pygame.display.update()
+    event = pygame.event.wait()
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_SPACE:
+            while (run):
+                clock.tick(FPS)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                collision_handler()
+                bird.grav()
+                block.move()
+                jump_handler()
+                boundaries_handler()
+                print(bird.score)
+                draw_window()
+            break
+        else:
+            break
 pygame.quit()
