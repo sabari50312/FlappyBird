@@ -14,6 +14,9 @@ VELOCITY = 7  #Initial downwards velocity 7 works
 FPS = 65  #FPS duh
 BIRD_SIZE = (P_WIDTH, P_HEIGHT)  #DO NOT CHANGE
 BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Player image
+BG = pygame.image.load("bg.png").convert_alpha()  #Background image
+PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()
+PIPE_BOTTOM = pygame.image.load("pipe1.png").convert_alpha()
 JUMP_HEIGHT = 7  #Jump height Feel free to experiment though 7 works pretty well
 GRAV = 0.8  #Gravity value Feel free to experiment though 0.8 works pretty well
 BLOCK_WIDTH = 140  #180
@@ -40,8 +43,10 @@ class obstacles:
         self.rect2.x -= self.velocity
 
     def draw(self):
-        pygame.draw.rect(WIN, (10, 200, 50), self.rect1)
-        pygame.draw.rect(WIN, (10, 200, 50), self.rect2)
+        pygame.draw.rect(WIN, (0, 0, 0), self.rect1)
+        pygame.draw.rect(WIN, (0, 0, 0), self.rect2)
+        WIN.blit(PIPE_TOP, (self.rect1.x, self.rect1.height - 379))
+        WIN.blit(PIPE_BOTTOM, (self.rect2.x, self.rect2.y))
 
 
 #The birdy class
@@ -70,11 +75,10 @@ class player:
 def draw_window():
     text_surface = my_font.render(str(bird.score), False, (0, 0, 0))
 
-    WIN.fill(BGCOLOR)
+    WIN.blit(BG, (0, 0))
     bird.draw()
     block.draw()
     WIN.blit(text_surface, dest=(WIDTH // 2, 30))
-
     pygame.display.update()
 
 
@@ -154,7 +158,6 @@ while (True):
                 block.move()
                 jump_handler()
                 boundaries_handler()
-                print(bird.score)
                 draw_window()
             break
         else:
