@@ -1,72 +1,82 @@
 import pygame
-from random import randint
+from random import choice
 
 pygame.init()
 
 #CONSTANTS
-WIDTH, HEIGHT = 500, 700  #Screen height and width
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
-P_HEIGHT = 38  #Player height DO NOT CHANGE
-P_WIDTH = 54  #Player width DO NOT CHANGE
-BGCOLOR = (255, 255, 255)  #Background color
-RED = (255, 0, 0)
-VELOCITY = 7  #Initial downwards velocity 7 works
-FPS = 65  #FPS duh
+WIDTH, HEIGHT = 400, 600  #Screen height and width
+P_HEIGHT = 24  #Player height DO NOT CHANGE
+P_WIDTH = 34  #Player width DO NOT CHANGE
+
+JUMP_HEIGHT = 7  #Jump height Feel free to experiment though 7 works pretty well
+BLOCK_WIDTH = 52  #52
+BLOCK_GAP = 150  #150
+BLOCK_VEL = 4  #4
+GRAV = 0.3  #Gravity value Feel free to experiment though 0.3 works pretty well
+VELOCITY = 3  #Initial downwards velocity 3 works
 BIRD_SIZE = (P_WIDTH, P_HEIGHT)  #DO NOT CHANGE
+FPS = 60  #FPS duh
+
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
+my_font = pygame.font.SysFont('Comic Sans MS', 30)  #Pygame surface for text
+
 BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Player image
 BG = pygame.image.load("bg.png").convert_alpha()  #Background image
-PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()
-PIPE_BOTTOM = pygame.image.load("pipe1.png").convert_alpha()
-JUMP_HEIGHT = 7  #Jump height Feel free to experiment though 7 works pretty well
-GRAV = 0.8  #Gravity value Feel free to experiment though 0.8 works pretty well
-BLOCK_WIDTH = 140  #180
-BLOCK_GAP = 210  #210
-BLOCK_VEL = 4  #4
-my_font = pygame.font.SysFont('Comic Sans MS', 30)
+PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()  #Top pipe image
+PIPE_BOTTOM = pygame.image.load(
+    "pipe1.png").convert_alpha()  #Bottom pipe image
+
+RUN = True
 
 
-#The blocks class
 class obstacles:
+    '''The blocks class'''
 
     def __init__(self, width, gap, velocity):
-        self.x = WIDTH + width - 20
-        self.width = width
-        self.velocity = velocity
-        self.height1 = randint(90, 400)
-        self.height2 = (HEIGHT - gap) - self.height1
-        self.rect1 = pygame.Rect(self.x, 0, self.width, self.height1)
+        self.x = WIDTH + width - 20  #x coordinate of pipes
+        self.width = width  #width of pipes
+        self.velocity = velocity  #velocity of pipes
+        self.height1 = choice([90, 130, 170, 210, 250, 290, 330,
+                               370])  #height of top pipes
+        self.height2 = (HEIGHT - gap) - self.height1  #height of bottom pipe
+        self.rect1 = pygame.Rect(self.x, 0, self.width,
+                                 self.height1)  #Top pipe hitbox
         self.rect2 = pygame.Rect(self.x, HEIGHT - self.height2, self.width,
-                                 self.height2)
+                                 self.height2)  #Bottom pipe hitbox
 
     def move(self):
+        '''Function to move the pipes'''
         self.rect1.x -= self.velocity
         self.rect2.x -= self.velocity
 
     def draw(self):
-        pygame.draw.rect(WIN, (0, 0, 0), self.rect1)
-        pygame.draw.rect(WIN, (0, 0, 0), self.rect2)
-        WIN.blit(PIPE_TOP, (self.rect1.x, self.rect1.height - 379))
-        WIN.blit(PIPE_BOTTOM, (self.rect2.x, self.rect2.y))
+        '''Draw pipes to screen'''
+        #pygame.draw.rect(WIN, (0, 0, 0), self.rect1)
+        #pygame.draw.rect(WIN, (0, 0, 0), self.rect2)
+        WIN.blit(PIPE_TOP, (self.rect1.x, self.rect1.height - 379))  #Top pipe
+        WIN.blit(PIPE_BOTTOM, (self.rect2.x, self.rect2.y))  #Bottom pipe
 
 
-#The birdy class
 class player:
+    '''The birdy class'''
 
     def __init__(self, x, y):
-        self.jumpcount = JUMP_HEIGHT
+        self.jumpcount = JUMP_HEIGHT  #Jump height of bird
         self.isjump = False
-        self.velocity = VELOCITY
-        self.neg = 1
-        self.rect = pygame.Rect(x, y, P_WIDTH, P_HEIGHT)
-        self.score = 0
-        self.score_updated = False
+        self.velocity = VELOCITY  #Downwards velocity of bird
+        self.neg = 1  #Variable for jump function
+        self.rect = pygame.Rect(x, y, P_WIDTH, P_HEIGHT)  #Bird hitbox
+        self.score = 0  #Score
+        self.score_updated = False  #Variable for score functionality
 
     def draw(self):
-        pygame.draw.rect(WIN, (255, 0, 0), self.rect)
+        '''Draw birdy to screen'''
+        #pygame.draw.rect(WIN, (255, 0, 0), self.rect)
         WIN.blit(BIRD_IMG,
                  (self.rect.x, self.rect.y))  #Draw the birdy on screen
 
     def grav(self):
+        '''Move the bird'''
         self.rect.y += self.velocity  #Move bird down
         self.velocity += GRAV  #Accelerate bird
 
@@ -74,7 +84,6 @@ class player:
 #All draw function calls
 def draw_window():
     text_surface = my_font.render(str(bird.score), False, (0, 0, 0))
-
     WIN.blit(BG, (0, 0))
     bird.draw()
     block.draw()
@@ -93,8 +102,8 @@ def jump_handler():
             if bird.jumpcount >= 0:
                 bird.neg = 1
             else:
-                bird.neg = -0.1
-            bird.rect.y -= (bird.jumpcount**2 * bird.neg)
+                bird.neg = -0.2
+            bird.rect.y -= (bird.jumpcount**2 * bird.neg) / 2
             bird.jumpcount -= 1
         else:
             bird.jumpcount = JUMP_HEIGHT
@@ -104,20 +113,24 @@ def jump_handler():
 
 #Function to make everything stay ON the screen. If it works dont fix it
 def boundaries_handler():
-    global run
+    global RUN
+    #If block goes out of screen create new block
     if block.rect1.x < -block.width:
         block.__init__(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)
         bird.score_updated = False
 
+    #If bird goes through gap
     if bird.rect.x > block.rect1.x + block.width and not bird.score_updated:
         bird.score += 1
         bird.score_updated = True
 
+    #If bird tries to go out of top of screen
     if bird.rect.y < 0:
         bird.rect.y = 0
 
+    #If bird falls down
     if bird.rect.y > HEIGHT:
-        run = False
+        RUN = False
 
 
 #Function that handles collisions. Mess with this to enable noclip :)
@@ -131,13 +144,12 @@ def collision_handler():
         pygame.quit()
 
 
-#Variables
-clock = pygame.time.Clock()
-block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)
-bird = player(100, HEIGHT / 2)
-run = True
+'''Global variables are the worst and I do not reccomend using them. Only used them here just for easy writing of code'''
+clock = pygame.time.Clock()  #Pygame clock object
+block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)  #Pipes object
+bird = player(100, HEIGHT / 2)  #Bird object
 
-#MAIN
+#MAIN loop
 while (True):
     text1 = my_font.render("Press space to start", True, (255, 255, 255))
     text2 = my_font.render("Any to quit", True, (255, 255, 255))
@@ -148,11 +160,11 @@ while (True):
     event = pygame.event.wait()
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_SPACE:
-            while (run):
+            while (RUN):
                 clock.tick(FPS)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        run = False
+                        RUN = False
                 collision_handler()
                 bird.grav()
                 block.move()
