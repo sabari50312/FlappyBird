@@ -2,7 +2,7 @@
 Flappy Bird game created in python using the PyGame module
 
 
-# Prerequisites 
+# Dependencies 
 
 Requires:
 - Python (https://www.python.org/downloads/)
