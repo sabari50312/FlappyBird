@@ -1,5 +1,5 @@
 # FlappyBird 
-Flappy Bird game created in python using the PyGame module
+Flappy Bird clone created in python using the PyGame module
 
 
 # Dependencies 
