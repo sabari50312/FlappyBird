@@ -172,25 +172,28 @@ def gameloop():
 
 
 #MAIN loop
-while (True):
-    WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
-    clock = pygame.time.Clock()  #Pygame clock object
-    block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)  #Pipes object
-    bird = player(100, HEIGHT / 2)  #Bird object
+try:
+    while (True):
+        WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
+        clock = pygame.time.Clock()  #Pygame clock object
+        block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)  #Pipes object
+        bird = player(100, HEIGHT / 2)  #Bird object
 
-    text1 = my_font.render("Press space to start", True, (255, 255, 255))
-    text2 = my_font.render("Any to quit", True, (255, 255, 255))
-    WIN.blit(text1, dest=(60, HEIGHT // 2 - 30))
-    WIN.blit(text2, dest=(60, HEIGHT // 2))
+        text1 = my_font.render("Press space to start", True, (255, 255, 255))
+        text2 = my_font.render("Any to quit", True, (255, 255, 255))
+        WIN.blit(text1, dest=(60, HEIGHT // 2 - 30))
+        WIN.blit(text2, dest=(60, HEIGHT // 2))
 
-    pygame.display.update()
-    event = pygame.event.wait()
-    RUN = True
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_SPACE:
-            gameloop()
-        else:
+        pygame.display.update()
+        event = pygame.event.wait()
+        RUN = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                gameloop()
+            else:
+                pygame.quit()
+                break
+        if event.type == pygame.QUIT:
             pygame.quit()
-            break
-    if event.type == pygame.QUIT:
-        pygame.quit()
+except pygame.error:
+    pass
