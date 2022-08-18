@@ -20,11 +20,13 @@ FPS = 60  #FPS duh
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
 my_font = pygame.font.SysFont('Comic Sans MS', 30)  #Pygame surface for text
 
-BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Player image
-BG = pygame.image.load("bg.png").convert_alpha()  #Background image
-PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()  #Top pipe image
+BIRD_IMG = pygame.image.load(
+    "flappyblock/birb.png").convert_alpha()  #Player image
+BG = pygame.image.load("flappyblock/bg.png").convert_alpha()  #Background image
+PIPE_TOP = pygame.image.load(
+    "flappyblock/pipe2.png").convert_alpha()  #Top pipe image
 PIPE_BOTTOM = pygame.image.load(
-    "pipe1.png").convert_alpha()  #Bottom pipe image
+    "flappyblock/pipe1.png").convert_alpha()  #Bottom pipe image
 
 RUN = True
 
@@ -135,13 +137,14 @@ def boundaries_handler():
 
 #Function that handles collisions. Mess with this to enable noclip :)
 def collision_handler():
+    global RUN
     if pygame.Rect.colliderect(bird.rect, block.rect1):
-        pygame.time.delay(500)
-        pygame.quit()
+        pygame.time.delay(300)
+        RUN = False
 
     if pygame.Rect.colliderect(bird.rect, block.rect2):
-        pygame.time.delay(500)
-        pygame.quit()
+        pygame.time.delay(300)
+        RUN = False
 
 
 '''Global variables are the worst and I do not reccomend using them. Only used them here just for easy writing of code'''
@@ -149,8 +152,32 @@ clock = pygame.time.Clock()  #Pygame clock object
 block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)  #Pipes object
 bird = player(100, HEIGHT / 2)  #Bird object
 
+
+def gameloop():
+    global RUN
+    while (RUN):
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    RUN = False
+            if event.type == pygame.QUIT:
+                RUN = False
+        collision_handler()
+        bird.grav()
+        block.move()
+        jump_handler()
+        boundaries_handler()
+        draw_window()
+
+
 #MAIN loop
 while (True):
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
+    clock = pygame.time.Clock()  #Pygame clock object
+    block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)  #Pipes object
+    bird = player(100, HEIGHT / 2)  #Bird object
+
     text1 = my_font.render("Press space to start", True, (255, 255, 255))
     text2 = my_font.render("Any to quit", True, (255, 255, 255))
     WIN.blit(text1, dest=(60, HEIGHT // 2 - 30))
@@ -158,20 +185,12 @@ while (True):
 
     pygame.display.update()
     event = pygame.event.wait()
+    RUN = True
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_SPACE:
-            while (RUN):
-                clock.tick(FPS)
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        RUN = False
-                collision_handler()
-                bird.grav()
-                block.move()
-                jump_handler()
-                boundaries_handler()
-                draw_window()
-            break
+            gameloop()
         else:
+            pygame.quit()
             break
-pygame.quit()
+    if event.type == pygame.QUIT:
+        pygame.quit()
